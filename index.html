@@ -1,0 +1,829 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>事前問診フォーム</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f8f6;
+      --panel: #ffffff;
+      --text: #1f2a24;
+      --muted: #68746d;
+      --line: #dce5df;
+      --primary: #06c755;
+      --primary-dark: #04a646;
+      --danger: #c7362f;
+      --focus: rgba(6, 199, 85, 0.28);
+      --shadow: 0 10px 28px rgba(31, 42, 36, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+    }
+
+    main {
+      width: min(100%, 720px);
+      margin: 0 auto;
+      padding: 20px 14px 36px;
+    }
+
+    .header {
+      padding: 10px 4px 18px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 24px;
+      line-height: 1.3;
+    }
+
+    .lead {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    form {
+      display: grid;
+      gap: 14px;
+    }
+
+    .section,
+    .status {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .section {
+      padding: 18px;
+    }
+
+    .section-title {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+
+    .field {
+      margin-top: 14px;
+    }
+
+    .field:first-child {
+      margin-top: 0;
+    }
+
+    label,
+    .label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .required {
+      margin-left: 6px;
+      color: var(--danger);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .hint {
+      margin: -2px 0 10px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    input,
+    textarea,
+    button {
+      font: inherit;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      min-height: 50px;
+      border: 1px solid #cfd9d3;
+      border-radius: 8px;
+      background: #ffffff;
+      color: var(--text);
+      padding: 12px 13px;
+      font-size: 16px;
+    }
+
+    textarea {
+      min-height: 132px;
+      resize: vertical;
+    }
+
+    input:focus,
+    textarea:focus {
+      outline: 3px solid var(--focus);
+      border-color: var(--primary);
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .choice-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .part-item {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .choice {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 52px;
+      color: var(--text);
+      font-weight: 700;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .choice input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .choice span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 52px;
+      border: 1px solid #cfd9d3;
+      border-radius: 8px;
+      background: #ffffff;
+      padding: 10px;
+    }
+
+    .choice input:focus-visible + span {
+      outline: 3px solid var(--focus);
+      border-color: var(--primary);
+    }
+
+    .choice input:checked + span {
+      border-color: var(--primary);
+      background: #e9fff2;
+      color: #064b24;
+    }
+
+    .sub-choice-grid {
+      display: none;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f7fbf8;
+    }
+
+    .part-item.is-selected .sub-choice-grid {
+      display: grid;
+    }
+
+    .sub-choice {
+      position: relative;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .sub-choice input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .sub-choice span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      border: 1px solid #cfd9d3;
+      border-radius: 8px;
+      background: #ffffff;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 700;
+      text-align: center;
+      padding: 8px;
+    }
+
+    .sub-choice input:focus-visible + span {
+      outline: 3px solid var(--focus);
+      border-color: var(--primary);
+    }
+
+    .sub-choice input:checked + span {
+      border-color: var(--primary);
+      background: #e9fff2;
+      color: #064b24;
+    }
+
+    .range-wrap {
+      display: grid;
+      gap: 8px;
+    }
+
+    input[type="range"] {
+      padding: 0;
+      min-height: 42px;
+      accent-color: var(--primary);
+    }
+
+    .pain-value {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .pain-value strong {
+      color: var(--text);
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .error {
+      display: none;
+      margin-top: 7px;
+      color: var(--danger);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .is-invalid input,
+    .is-invalid textarea,
+    .is-invalid .choice span {
+      border-color: var(--danger);
+    }
+
+    .is-invalid .error {
+      display: block;
+    }
+
+    .status {
+      display: none;
+      padding: 13px 14px;
+      font-weight: 700;
+    }
+
+    .status.is-visible {
+      display: block;
+    }
+
+    .status[data-type="success"] {
+      border-color: #89d9a8;
+      background: #effaf3;
+      color: #095b2c;
+    }
+
+    .status[data-type="error"] {
+      border-color: #eda8a4;
+      background: #fff3f2;
+      color: var(--danger);
+    }
+
+    .status[data-type="loading"] {
+      border-color: #b9ddc7;
+      background: #f4fff8;
+      color: #07562a;
+    }
+
+    .actions {
+      position: sticky;
+      bottom: 0;
+      z-index: 2;
+      margin: 2px -14px -36px;
+      padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+      background: rgba(245, 248, 246, 0.94);
+      backdrop-filter: blur(8px);
+      border-top: 1px solid var(--line);
+    }
+
+    button {
+      width: 100%;
+      min-height: 56px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--primary);
+      color: #ffffff;
+      font-size: 18px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    button:active {
+      background: var(--primary-dark);
+    }
+
+    button:disabled {
+      background: #9db6a8;
+      cursor: wait;
+    }
+
+    @media (min-width: 560px) {
+      main {
+        padding-top: 30px;
+      }
+
+      .choice-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header class="header">
+      <h1>事前問診フォーム</h1>
+      <p class="lead">ご来院前に現在の状態をお知らせください。必須項目を入力して送信してください。</p>
+    </header>
+
+    <form id="questionnaireForm" novalidate>
+      <section class="section" aria-labelledby="visitTypeTitle">
+        <h2 class="section-title" id="visitTypeTitle">はじめに選択してください</h2>
+        <div class="field" data-required-group="visitType">
+          <span class="label">ご来院状況<span class="required">必須</span></span>
+          <div class="segmented">
+            <label class="choice">
+              <input type="radio" name="visitType" value="初めての方" required>
+              <span>初めての方</span>
+            </label>
+            <label class="choice">
+              <input type="radio" name="visitType" value="1ヵ月ぶりの方" required>
+              <span>1ヵ月ぶりの方</span>
+            </label>
+          </div>
+          <p class="error">ご来院状況を選択してください。</p>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="profileTitle">
+        <h2 class="section-title" id="profileTitle">ご本人情報</h2>
+        <div class="field">
+          <label for="name">氏名<span class="required">必須</span></label>
+          <input id="name" name="name" type="text" autocomplete="name" required>
+          <p class="error">氏名を入力してください。</p>
+        </div>
+        <div class="field">
+          <label for="kana">フリガナ<span class="required">必須</span></label>
+          <input id="kana" name="kana" type="text" autocomplete="off" required>
+          <p class="error">フリガナを入力してください。</p>
+        </div>
+        <div class="field">
+          <label for="phone">電話番号<span class="required">必須</span></label>
+          <input id="phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="09012345678" required>
+          <p class="error">電話番号を入力してください。</p>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="symptomTitle">
+        <h2 class="section-title" id="symptomTitle">症状について</h2>
+        <div class="field" data-required-group="bodyParts">
+          <span class="label">本日気になる部位<span class="required">必須</span></span>
+          <p class="hint">※全て教えてください</p>
+          <div class="choice-grid">
+            <div class="part-item">
+              <label class="choice">
+                <input type="checkbox" name="bodyParts" value="前回と同じ">
+                <span>前回と同じ</span>
+              </label>
+            </div>
+            <div class="part-item" data-detail-type="side">
+              <label class="choice">
+                <input type="checkbox" name="bodyParts" value="頭">
+                <span>頭</span>
+              </label>
+              <div class="sub-choice-grid" aria-label="頭の左右">
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="頭:左" disabled><span>左</span></label>
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="頭:右" disabled><span>右</span></label>
+              </div>
+            </div>
+            <div class="part-item" data-detail-type="side">
+              <label class="choice">
+                <input type="checkbox" name="bodyParts" value="首">
+                <span>首</span>
+              </label>
+              <div class="sub-choice-grid" aria-label="首の左右">
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="首:左" disabled><span>左</span></label>
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="首:右" disabled><span>右</span></label>
+              </div>
+            </div>
+            <div class="part-item" data-detail-type="side">
+              <label class="choice">
+                <input type="checkbox" name="bodyParts" value="肩">
+                <span>肩</span>
+              </label>
+              <div class="sub-choice-grid" aria-label="肩の左右">
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="肩:左" disabled><span>左</span></label>
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="肩:右" disabled><span>右</span></label>
+              </div>
+            </div>
+            <div class="part-item" data-detail-type="side">
+              <label class="choice">
+                <input type="checkbox" name="bodyParts" value="腕">
+                <span>腕</span>
+              </label>
+              <div class="sub-choice-grid" aria-label="腕の左右">
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="腕:左" disabled><span>左</span></label>
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="腕:右" disabled><span>右</span></label>
+              </div>
+            </div>
+            <div class="part-item" data-detail-type="side">
+              <label class="choice">
+                <input type="checkbox" name="bodyParts" value="肘">
+                <span>肘</span>
+              </label>
+              <div class="sub-choice-grid" aria-label="肘の左右">
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="肘:左" disabled><span>左</span></label>
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="肘:右" disabled><span>右</span></label>
+              </div>
+            </div>
+            <div class="part-item" data-detail-type="side">
+              <label class="choice">
+                <input type="checkbox" name="bodyParts" value="手首">
+                <span>手首</span>
+              </label>
+              <div class="sub-choice-grid" aria-label="手首の左右">
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="手首:左" disabled><span>左</span></label>
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="手首:右" disabled><span>右</span></label>
+              </div>
+            </div>
+            <div class="part-item" data-detail-type="finger">
+              <label class="choice">
+                <input type="checkbox" name="bodyParts" value="手の指">
+                <span>手の指</span>
+              </label>
+              <div class="sub-choice-grid" aria-label="手の指">
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="手の指:親指" disabled><span>親指</span></label>
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="手の指:人差し指" disabled><span>人差し指</span></label>
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="手の指:中指" disabled><span>中指</span></label>
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="手の指:薬指" disabled><span>薬指</span></label>
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="手の指:小指" disabled><span>小指</span></label>
+              </div>
+            </div>
+            <div class="part-item" data-detail-type="side">
+              <label class="choice">
+                <input type="checkbox" name="bodyParts" value="背中">
+                <span>背中</span>
+              </label>
+              <div class="sub-choice-grid" aria-label="背中の左右">
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="背中:左" disabled><span>左</span></label>
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="背中:右" disabled><span>右</span></label>
+              </div>
+            </div>
+            <div class="part-item" data-detail-type="side">
+              <label class="choice">
+                <input type="checkbox" name="bodyParts" value="腰">
+                <span>腰</span>
+              </label>
+              <div class="sub-choice-grid" aria-label="腰の左右">
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="腰:左" disabled><span>左</span></label>
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="腰:右" disabled><span>右</span></label>
+              </div>
+            </div>
+            <div class="part-item" data-detail-type="side">
+              <label class="choice">
+                <input type="checkbox" name="bodyParts" value="骨盤">
+                <span>骨盤</span>
+              </label>
+              <div class="sub-choice-grid" aria-label="骨盤の左右">
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="骨盤:左" disabled><span>左</span></label>
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="骨盤:右" disabled><span>右</span></label>
+              </div>
+            </div>
+            <div class="part-item" data-detail-type="side">
+              <label class="choice">
+                <input type="checkbox" name="bodyParts" value="股関節">
+                <span>股関節</span>
+              </label>
+              <div class="sub-choice-grid" aria-label="股関節の左右">
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="股関節:左" disabled><span>左</span></label>
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="股関節:右" disabled><span>右</span></label>
+              </div>
+            </div>
+            <div class="part-item" data-detail-type="side">
+              <label class="choice">
+                <input type="checkbox" name="bodyParts" value="太もも">
+                <span>太もも</span>
+              </label>
+              <div class="sub-choice-grid" aria-label="太ももの左右">
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="太もも:左" disabled><span>左</span></label>
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="太もも:右" disabled><span>右</span></label>
+              </div>
+            </div>
+            <div class="part-item" data-detail-type="side">
+              <label class="choice">
+                <input type="checkbox" name="bodyParts" value="膝">
+                <span>膝</span>
+              </label>
+              <div class="sub-choice-grid" aria-label="膝の左右">
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="膝:左" disabled><span>左</span></label>
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="膝:右" disabled><span>右</span></label>
+              </div>
+            </div>
+            <div class="part-item" data-detail-type="side">
+              <label class="choice">
+                <input type="checkbox" name="bodyParts" value="ふくらはぎ">
+                <span>ふくらはぎ</span>
+              </label>
+              <div class="sub-choice-grid" aria-label="ふくらはぎの左右">
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="ふくらはぎ:左" disabled><span>左</span></label>
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="ふくらはぎ:右" disabled><span>右</span></label>
+              </div>
+            </div>
+            <div class="part-item" data-detail-type="side">
+              <label class="choice">
+                <input type="checkbox" name="bodyParts" value="足首">
+                <span>足首</span>
+              </label>
+              <div class="sub-choice-grid" aria-label="足首の左右">
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="足首:左" disabled><span>左</span></label>
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="足首:右" disabled><span>右</span></label>
+              </div>
+            </div>
+            <div class="part-item" data-detail-type="side">
+              <label class="choice">
+                <input type="checkbox" name="bodyParts" value="足裏">
+                <span>足裏</span>
+              </label>
+              <div class="sub-choice-grid" aria-label="足裏の左右">
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="足裏:左" disabled><span>左</span></label>
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="足裏:右" disabled><span>右</span></label>
+              </div>
+            </div>
+            <div class="part-item" data-detail-type="finger">
+              <label class="choice">
+                <input type="checkbox" name="bodyParts" value="足の指">
+                <span>足の指</span>
+              </label>
+              <div class="sub-choice-grid" aria-label="足の指">
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="足の指:親指" disabled><span>親指</span></label>
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="足の指:人差し指" disabled><span>人差し指</span></label>
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="足の指:中指" disabled><span>中指</span></label>
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="足の指:薬指" disabled><span>薬指</span></label>
+                <label class="sub-choice"><input type="checkbox" name="bodyPartDetail" value="足の指:小指" disabled><span>小指</span></label>
+              </div>
+            </div>
+            <div class="part-item">
+              <label class="choice">
+                <input type="checkbox" name="bodyParts" value="その他">
+                <span>その他</span>
+              </label>
+            </div>
+          </div>
+          <p class="error">本日気になる部位を1つ以上選択してください。</p>
+        </div>
+        <div class="field">
+          <label for="painLevel">あなたが感じる痛みレベル<span class="required">必須</span></label>
+          <p class="hint">※スライダーを調整してください</p>
+          <div class="range-wrap">
+            <input id="painLevel" name="painLevel" type="range" min="0" max="10" value="5" required>
+            <div class="pain-value">
+              <span>0 痛みなし</span>
+              <strong id="painLevelValue">5</strong>
+              <span>10 最も強い</span>
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="startedAt">いつから<span class="required">必須</span></label>
+          <input id="startedAt" name="startedAt" type="date" required>
+          <p class="error">いつから症状があるか選択してください。</p>
+        </div>
+        <div class="field">
+          <label for="trigger">きっかけ</label>
+          <p class="hint">※わかる範囲で教えてください</p>
+          <textarea id="trigger" name="trigger" placeholder="例：転倒した、荷物を持った、運動中など"></textarea>
+        </div>
+        <div class="field" data-required-group="electricTreatmentIssue">
+          <span class="label">電気治療を受けて具合が悪くなったことはありますか？<span class="required">必須</span></span>
+          <div class="segmented">
+            <label class="choice">
+              <input type="radio" name="electricTreatmentIssue" value="はい" required>
+              <span>はい</span>
+            </label>
+            <label class="choice">
+              <input type="radio" name="electricTreatmentIssue" value="いいえ" required>
+              <span>いいえ</span>
+            </label>
+          </div>
+          <p class="error">はい、またはいいえを選択してください。</p>
+        </div>
+        <div class="field">
+          <label for="message">本日伝えたいこと</label>
+          <textarea id="message" name="message" placeholder="気になること、きっかけ、施術で不安なことなど"></textarea>
+        </div>
+      </section>
+
+      <div id="status" class="status" role="status" aria-live="polite"></div>
+
+      <div class="actions">
+        <button id="submitButton" type="submit">送信する</button>
+      </div>
+    </form>
+  </main>
+
+  <script>
+    const GAS_ENDPOINT = "https://script.google.com/macros/s/AKfycbxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/exec";
+
+    // LIFF SDKを追加する場合は、ここでliff.init()とLINEプロフィール取得処理を追加します。
+
+    const form = document.getElementById("questionnaireForm");
+    const statusBox = document.getElementById("status");
+    const submitButton = document.getElementById("submitButton");
+    const painLevel = document.getElementById("painLevel");
+    const painLevelValue = document.getElementById("painLevelValue");
+    const bodyPartsField = document.querySelector("[data-required-group='bodyParts']");
+
+    painLevel.addEventListener("input", () => {
+      painLevelValue.textContent = painLevel.value;
+    });
+
+    bodyPartsField.addEventListener("change", (event) => {
+      if (event.target.name === "bodyParts") {
+        updateBodyPartDetails();
+      }
+    });
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      clearValidation();
+
+      if (!validateForm()) {
+        showStatus("未入力の必須項目があります。内容を確認してください。", "error");
+        return;
+      }
+
+      const payload = buildPayload();
+      setSubmitting(true);
+      showStatus("送信中です。画面を閉じずにお待ちください。", "loading");
+
+      try {
+        const response = await fetch(GAS_ENDPOINT, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        showStatus("送信が完了しました。ご回答ありがとうございます。", "success");
+        form.reset();
+        painLevel.value = "5";
+        painLevelValue.textContent = "5";
+        updateBodyPartDetails();
+      } catch (error) {
+        console.error(error);
+        showStatus("送信に失敗しました。通信状況を確認して、もう一度お試しください。", "error");
+      } finally {
+        setSubmitting(false);
+      }
+    });
+
+    function buildPayload() {
+      const formData = new FormData(form);
+      const bodyParts = formData.getAll("bodyParts");
+      const bodyPartDetails = buildBodyPartDetails(formData.getAll("bodyPartDetail"));
+
+      return {
+        name: formData.get("name").trim(),
+        kana: formData.get("kana").trim(),
+        phone: formData.get("phone").trim(),
+        visitType: formData.get("visitType"),
+        bodyParts,
+        bodyPartDetails,
+        painLevel: Number(formData.get("painLevel")),
+        startedAt: formData.get("startedAt").trim(),
+        trigger: formData.get("trigger").trim(),
+        electricTreatmentIssue: formData.get("electricTreatmentIssue"),
+        message: formData.get("message").trim(),
+        submittedAt: new Date().toISOString()
+      };
+    }
+
+    function buildBodyPartDetails(detailValues) {
+      return detailValues.reduce((details, value) => {
+        const separatorIndex = value.indexOf(":");
+        if (separatorIndex === -1) {
+          return details;
+        }
+
+        const bodyPart = value.slice(0, separatorIndex);
+        const detail = value.slice(separatorIndex + 1);
+
+        if (!details[bodyPart]) {
+          details[bodyPart] = [];
+        }
+
+        details[bodyPart].push(detail);
+        return details;
+      }, {});
+    }
+
+    function updateBodyPartDetails() {
+      bodyPartsField.querySelectorAll(".part-item").forEach((item) => {
+        const bodyPartInput = item.querySelector("input[name='bodyParts']");
+        const detailInputs = item.querySelectorAll("input[name='bodyPartDetail']");
+        const isSelected = Boolean(bodyPartInput && bodyPartInput.checked);
+
+        item.classList.toggle("is-selected", isSelected);
+        detailInputs.forEach((detailInput) => {
+          detailInput.disabled = !isSelected;
+          if (!isSelected) {
+            detailInput.checked = false;
+          }
+        });
+      });
+    }
+
+    function validateForm() {
+      let isValid = true;
+      const requiredFields = form.querySelectorAll("input[required]:not([type='radio']), textarea[required]");
+
+      requiredFields.forEach((field) => {
+        if (!field.value.trim()) {
+          setInvalid(field.closest(".field"));
+          isValid = false;
+        }
+      });
+
+      if (!form.querySelector("input[name='visitType']:checked")) {
+        setInvalid(form.querySelector("[data-required-group='visitType']"));
+        isValid = false;
+      }
+
+      if (!form.querySelector("input[name='electricTreatmentIssue']:checked")) {
+        setInvalid(form.querySelector("[data-required-group='electricTreatmentIssue']"));
+        isValid = false;
+      }
+
+      if (!form.querySelector("input[name='bodyParts']:checked")) {
+        setInvalid(form.querySelector("[data-required-group='bodyParts']"));
+        isValid = false;
+      }
+
+      return isValid;
+    }
+
+    function setInvalid(field) {
+      if (field) {
+        field.classList.add("is-invalid");
+      }
+    }
+
+    function clearValidation() {
+      form.querySelectorAll(".is-invalid").forEach((field) => {
+        field.classList.remove("is-invalid");
+      });
+    }
+
+    function showStatus(message, type) {
+      statusBox.textContent = message;
+      statusBox.dataset.type = type;
+      statusBox.classList.add("is-visible");
+    }
+
+    function setSubmitting(isSubmitting) {
+      submitButton.disabled = isSubmitting;
+      submitButton.textContent = isSubmitting ? "送信中..." : "送信する";
+    }
+  </script>
+</body>
+</html>
