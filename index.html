@@ -657,7 +657,7 @@
   </main>
 
   <script>
-    const GAS_ENDPOINT = "https://script.google.com/macros/s/AKfycbyT6jvE5qNequ84olRR7to_Oq3f16s5I3JIaxK82l41jq2_0AlKDCsjQ9iQDgzxQoMY/exec";
+    const GAS_ENDPOINT = "https://script.google.com/macros/s/AKfycbxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/exec";
 
     // LIFF SDKを追加する場合は、ここでliff.init()とLINEプロフィール取得処理を追加します。
 
@@ -695,7 +695,7 @@
         const response = await fetch(GAS_ENDPOINT, {
           method: "POST",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "text/plain;charset=utf-8"
           },
           body: JSON.stringify(payload)
         });
@@ -710,8 +710,9 @@
         painLevelValue.textContent = "5";
         updateBodyPartDetails();
       } catch (error) {
-        console.error(error);
-        showStatus("送信に失敗しました。通信状況を確認して、もう一度お試しください。", "error");
+        console.error("送信に失敗しました:", error);
+        const detail = error && error.message ? `（${error.message}）` : "";
+        showStatus(`送信に失敗しました。通信状況を確認して、もう一度お試しください。${detail}`, "error");
       } finally {
         setSubmitting(false);
       }
